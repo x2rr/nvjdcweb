@@ -29,4 +29,8 @@ export default {
     width: 25px;
     height: 25px;
 }
+.flex {
+  display: flex;
+  align-items: center;
+}
 </style>
