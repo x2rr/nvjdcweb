@@ -2,7 +2,7 @@
 # nvjdcweb
 
 ## 提示
-vue 前端页面
+vue nvjdc 前端页面
 
 个人使用，UI美化，细节调整，去除WSKEY
 ## 特别声明:
