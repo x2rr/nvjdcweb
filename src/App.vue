@@ -20,7 +20,7 @@ export default {
   },setup() {
     let locale = zhCn;
      let data = reactive({
-       title:"NolanJDCloud",
+       title:"RabtJDC",
      })
      const getmainConfigtitle = async () => {
     

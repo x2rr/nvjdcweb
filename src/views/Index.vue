@@ -47,7 +47,7 @@
           />
         </div>
         <div class="card-footer">
-          <el-button type="success" size="small" auto @click="upAccount"
+          <el-button class="edit" type="success" size="small" auto @click="upAccount"
             >修改</el-button
           >
         </div>
@@ -103,7 +103,13 @@
  
 
 </template>
-
+<style lang="scss" scoped>
+.card-footer {
+  .edit {
+    margin-top: 10px;
+  }
+}
+</style>
 <style>
 .text-blue-400 {
   color: blue;
@@ -174,12 +180,12 @@ export default {
       nickname: undefined,
       timestamp: undefined,
       remarks: "",
-      qrurl: "",
+      qrurl: "./qr.png",
       showuser:false,
       ck: "",
       expires:0,
       expirestext:"",
-      qrshow: false,
+      qrshow: true,
     });
    
     const getInfo = async () => {
@@ -205,7 +211,9 @@ export default {
       localStorage.setItem("qlid", userInfo.data.qlid);
       localStorage.setItem("qlky", userInfo.data.qlky);
       data.nickname = userInfo.data.nickname;
-      data.qrurl = userInfo.data.qrurl;
+      if(userInfo.data.qrurl&&userInfo.data.qrurl!=''){
+        data.qrurl = userInfo.data.qrurl;
+      }
       data.ck = userInfo.data.ck;
       if (data.qrurl != "") data.qrshow = true;
       data.timestamp = new Date(userInfo.data.timestamp).toLocaleString();
