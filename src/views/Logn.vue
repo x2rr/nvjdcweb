@@ -3,17 +3,21 @@
     <el-col :span="24">
       <el-card style="max-width: 510px; justify-content: center; margin: auto">
         <el-tag style="font-size: var(--el-font-size-large)"
-          ><i class="el-icon-chat-round"></i> 公告</el-tag
+          ><i class="el-icon-chat-round"></i> 亲友团使用须知</el-tag
         >
-        <p>
-          <span
-            style="font-size: var(--el-font-size-small)"
-            v-html="announcement"
-          ></span>
-        </p>
+        <div class="announcement" v-html="announcement"></div>
       </el-card>
     </el-col>
   </el-row>
+  <div v-if="times > 0" class="time-alert-row">
+    <el-alert
+      :title="times + '秒后释放资源'"
+      type="warning"
+      :closable="false"
+      show-icon
+    >
+    </el-alert>
+  </div>
   <el-row :span="24" v-show="ck !== ''">
     <el-col :span="24">
       <el-card>
@@ -47,12 +51,11 @@
             <span>请完成安全验证</span>
           </div>
         </template>
-        <div class="card-body">
+        <div class="card-body captcha-body">
           <el-row class="demo-autocomplete">
             <el-col>
               <el-tag type="success">资源余量：{{ tabcount }}</el-tag>
               <el-tag>当前占用:{{ marginCount }}</el-tag>
-              <el-tag type="danger">{{ times }}秒后释放资源</el-tag>
             </el-col>
           </el-row>
           <el-row class="demo-autocomplete">
@@ -73,19 +76,16 @@
             <span>请完成安全验证</span>
           </div>
         </template>
-        <div class="card-body">
+        <div class="card-body captcha-body">
           <el-row class="demo-autocomplete">
             <el-col>
               <el-tag type="success">资源余量：{{ tabcount }}</el-tag>
               <el-tag>当前占用:{{ marginCount }}</el-tag>
-              <el-tag type="danger">{{ times }}秒后释放资源</el-tag>
             </el-col>
           </el-row>
           <el-row class="demo-autocomplete">
-            <el-col>
-              <div
-                style="width: 272px; width: 272px; height: 169px; margin: auto"
-              >
+            <el-col class="flex-column">
+              <div>
                 <div id="captchaTip">
                   <img id="cpcImg" :src="imgUrl" @click="captchaTipclick" />
                   <div
@@ -104,7 +104,7 @@
               <img id="cpcTipImg" :src="imgUrl2" width="275" />
             </el-col>
           </el-row>
-          <el-button type="primary" size="medium" round @click="cap2click"
+          <el-button class="submit" type="primary" size="medium" round @click="cap2click"
             >确认</el-button
           >
         </div>
@@ -117,28 +117,25 @@
         <div class="card-body">
           <el-tabs v-model="activeName">
             <el-tab-pane label="短信登陆" name="first">
-              <el-row class="demo-autocomplete" v-show="uploadtype === 'ql'">
-                <el-col style="font-size: 14px">
-                  <el-tag>CK容量:{{ ckcount }}</el-tag>
-                </el-col>
-              </el-row>
               <el-row class="demo-autocomplete">
                 <el-col>
+                  <el-tag v-show="uploadtype === 'ql'"
+                    >CK容量:{{ ckcount }}</el-tag
+                  >
                   <el-tag type="success">资源余量：{{ tabcount }}</el-tag>
-                  <el-tag>当前占用:{{ marginCount }}</el-tag>
-                  <el-tag type="danger">{{ times }}秒后释放资源</el-tag>
+                  <el-tag type="warning">当前占用:{{ marginCount }}</el-tag>
+                  <!-- <el-tag type="danger">{{ times }}秒后释放资源</el-tag> -->
                 </el-col>
               </el-row>
 
               <el-row class="demo-autocomplete" v-show="uploadtype === 'xdd'">
                 <el-col>
-                  <span class="elabe">你的QQ</span>
+                  <span class="elabel">你的QQ</span>
                 </el-col>
               </el-row>
               <el-row class="demo-autocomplete" v-show="uploadtype === 'xdd'">
                 <el-col>
                   <el-input
-                    style="max-width: 260px"
                     v-model="QQ"
                     placeholder="QQ"
                     prefix-icon="el-icon-chat-round"
@@ -147,13 +144,12 @@
               </el-row>
               <el-row class="demo-autocomplete">
                 <el-col>
-                  <span class="elabe">你的手机号码</span>
+                  <span class="elabel">你的手机号码</span>
                 </el-col>
               </el-row>
               <el-row class="demo-autocomplete">
                 <el-col>
                   <el-input
-                    style="max-width: 260px"
                     v-model="phone"
                     placeholder="Phone"
                     prefix-icon="el-icon-mobile-phone"
@@ -162,14 +158,13 @@
               </el-row>
               <el-row class="demo-autocomplete">
                 <el-col>
-                  <span class="elabe">验证码</span>
+                  <span class="elabel">验证码</span>
                 </el-col>
               </el-row>
               <el-row class="demo-autocomplete">
                 <el-col>
                   <el-input
                     v-model="code"
-                    style="max-width: 150px"
                     placeholder="Code"
                     prefix-icon="el-icon-lock"
                   />
@@ -178,15 +173,9 @@
                     v-show="isShow"
                     @click="GetSMSCode"
                     plain
-                    style="width: 110px"
                     >获取验证码</el-button
                   >
-                  <el-button
-                    type="success"
-                    v-show="!isShow"
-                    plain
-                    style="width: 110px"
-                    disabled
+                  <el-button type="success" v-show="!isShow" plain disabled
                     >{{ Codetime }}秒后重发</el-button
                   >
                 </el-col>
@@ -201,7 +190,6 @@
                   <el-select
                     v-model="optionsvlue"
                     placeholder="Select"
-                    style="width: 100%; max-width: 260px"
                     @change="valuechange"
                   >
                     <el-option
@@ -223,11 +211,16 @@
                   </el-select>
                 </el-col>
               </el-row>
-              <el-button type="primary" size="medium" round @click="Login"
+              <el-button
+                class="submit"
+                type="primary"
+                size="medium"
+                round
+                @click="Login"
                 >登录</el-button
               >
             </el-tab-pane>
-            <el-tab-pane
+            <!-- <el-tab-pane
               label="WSKEY"
               name="WSKEY"
               :disabled="uploadtype !== 'ql'"
@@ -239,13 +232,13 @@
               </el-row>
               <el-row class="demo-autocomplete">
                 <el-col>
-                  <span class="elabe">WSKEY</span>
+                  <span class="elabel">WSKEY</span>
                 </el-col>
               </el-row>
               <el-row class="demo-autocomplete">
                 <el-col>
                   <el-input
-                    style="max-width: 260px"
+                    
                     v-model="wskey"
                     placeholder="wskey"
                     prefix-icon="el-icon-edit"
@@ -254,14 +247,14 @@
               </el-row>
               <el-row class="demo-autocomplete">
                 <el-col>
-                  <span class="elabe">备注</span>
+                  <span class="elabel">备注</span>
                 </el-col>
               </el-row>
               <el-row class="demo-autocomplete">
                 <el-col>
                   <el-input
                     v-model="remarks"
-                    style="max-width: 260px"
+                    
                     placeholder="remarks"
                     prefix-icon="el-icon-lock"
                   />
@@ -277,7 +270,6 @@
                   <el-select
                     v-model="optionsvlue"
                     placeholder="Select"
-                    style="width: 100%; max-width: 260px"
                     @change="valuechange"
                   >
                     <el-option
@@ -300,21 +292,85 @@
                 </el-col>
               </el-row>
               <el-button type="primary" size="medium" @click="UploadWSKEYS">上传 </el-button>
-            </el-tab-pane>
+            </el-tab-pane> -->
           </el-tabs>
         </div>
       </el-card>
     </el-col>
   </el-row>
 </template>
-<style>
-.elabe {
-  font-size: var(--el-font-size-base);
+<style lang="scss" scoped>
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.announcement {
+  font-size: 14px;
+  text-align: left;
+  padding: 15px 0 5px;
+  ::v-deep div {
+    margin: 5px 0;
+    &.tip {
+      color: #f56c6c;
+      font-weight: 700;
+    }
+  }
+}
+.el-tab-pane,
+.flex-column {
+  flex-direction: column;
+  display: flex;
+  align-items: center;
 }
 .demo-autocomplete {
-  margin-bottom: 10px;
+  width: 272px;
+  .el-col {
+    flex: 0 0 272px;
+    display: flex;
+    align-content: center;
+    justify-content: space-between;
+    .el-input {
+      flex: 1;
+    }
+    .el-button {
+      padding: 0;
+      width: 105px;
+      margin-left: 5px;
+    }
+    .el-select {
+      flex: 1;
+    }
+  }
 }
-.esuccess {
+.time-alert-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+  .el-alert {
+    width: 510px;
+    border-radius: 5px;
+  }
+}
+.submit {
+  margin-top: 10px;
+}
+.captcha-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+</style>
+<style>
+.elabel {
+  font-size: var(--el-font-size-base);
+  padding-left: 5px;
+  margin-top: 10px;
+}
+.demo-autocomplete {
+  margin-bottom: 5px;
+}
+.success {
   color: var(--el-color-success) !important;
 }
 .block {
@@ -378,7 +434,7 @@
 }
 
 .sliderContainer_success .sliderIcon:before {
-  content: "\f00c";
+  content: '\f00c';
 }
 
 .sliderContainer_fail .slider {
@@ -394,7 +450,7 @@
 }
 
 .sliderContainer_fail .sliderIcon:before {
-  content: "\f00d";
+  content: '\f00d';
 }
 
 .sliderContainer_active .sliderText,
@@ -458,13 +514,13 @@
 }
 </style>
 <script>
-import { onMounted, reactive, toRefs } from "vue";
-import { useRouter } from "vue-router";
-import { ElLoading } from "element-plus";
-import $ from "jquery";
+import { onMounted, reactive, toRefs } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElLoading } from 'element-plus';
+import $ from 'jquery';
 
-import { ElMessage, ElNotification } from "element-plus";
-import "@/assets/slidercaptch.js";
+import { ElMessage, ElNotification } from 'element-plus';
+import '@/assets/slidercaptch.js';
 import {
   getConfigMain,
   getQLConfig,
@@ -474,14 +530,14 @@ import {
   VerifyCaptcha,
   VerifyCaptcha2,
   UploadWSKEY,
-} from "@/api/index";
-import Clipboard from "clipboard";
+} from '@/api/index';
+import Clipboard from 'clipboard';
 export default {
   setup() {
     const router = useRouter();
     let data = reactive({
-      imgUrl: require("../assets/1.jpg"),
-      imgUrl2: require("../assets/1.1.png"),
+      imgUrl: require('../assets/1.jpg'),
+      imgUrl2: require('../assets/1.1.png'),
       pointlist: [],
       marginCount: 0,
       WSKEYCount: 0,
@@ -495,63 +551,63 @@ export default {
       ShowCaptcha2: false,
       ShowCaptcha: false,
       ShowMain: true,
-      code: "",
-      ck: "",
-      QQ: "",
-      wskey: "",
-      remarks: "",
-      activeName: "first",
+      code: '',
+      ck: '',
+      QQ: '',
+      wskey: '',
+      remarks: '',
+      activeName: 'first',
       times: 0,
       Codetime: 60,
       isSHowAnnouncement: false,
-      announcement: "",
+      announcement: '',
       centerDialogVisible: true,
       getCode: false,
       options: [],
       optionsvlue: 0,
-      uploadtype: "none",
-      phone: "",
-      oldphone: "",
+      uploadtype: 'none',
+      phone: '',
+      oldphone: '',
       VsliderCaptcha: null,
       form: {
-        code: "",
-        phone: "",
+        code: '',
+        phone: '',
       },
     });
 
     const CopyCK = async () => {
-      var clipboard = new Clipboard("#btncopy"); // 这里可以理解为选择器，选择上面的复制按钮
-      clipboard.on("success", () => {
-        console.log("复制成功");
-        ElMessage.success("复制成功");
+      var clipboard = new Clipboard('#btncopy'); // 这里可以理解为选择器，选择上面的复制按钮
+      clipboard.on('success', () => {
+        console.log('复制成功');
+        ElMessage.success('复制成功');
 
         clipboard.destroy();
       });
-      clipboard.on("error", () => {
-        console.log("复制失败");
-        ElMessage.error("复制失败");
+      clipboard.on('error', () => {
+        console.log('复制失败');
+        ElMessage.error('复制失败');
         // 释放内存
         clipboard.destroy();
       });
     };
     const getmainConfig = async () => {
-      const cphone = localStorage.getItem("phone");
+      const cphone = localStorage.getItem('phone');
       if (cphone) {
         data.phone = cphone;
-        localStorage.removeItem("phone");
+        localStorage.removeItem('phone');
       }
-      data.VsliderCaptcha = $("#captcha").sliderCaptcha({
-        id: "captcha",
+      data.VsliderCaptcha = $('#captcha').sliderCaptcha({
+        id: 'captcha',
         width: 271,
         height: 170,
         sliderL: 51,
-        barText: "向右滑动填充拼图",
-        remoteUrl: "123",
+        barText: '向右滑动填充拼图',
+        remoteUrl: '123',
         verify: async function (arr, url) {
           console.log(url);
           const loading = ElLoading.service({
             lock: true,
-            text: "验证中请稍候..",
+            text: '验证中请稍候..',
           });
 
           var VerifyCaptchadata = await VerifyCaptcha({
@@ -571,11 +627,11 @@ export default {
             }, 1000);
             data.ShowCaptcha = false;
             data.ShowMain = true;
-            ElMessage.success("认证成功");
+            ElMessage.success('认证成功');
             return true;
           } else {
             if (VerifyCaptchadata.data.status == 666) {
-              ElMessage.error("验证失败,请重试");
+              ElMessage.error('验证失败,请重试');
               data.VsliderCaptcha.reset(
                 VerifyCaptchadata.data.big,
                 VerifyCaptchadata.data.small
@@ -593,18 +649,18 @@ export default {
       data.uploadtype = configdata.data.type;
       data.ctime = configdata.data.closetime;
       data.announcement = configdata.data.announcement;
-      if (configdata.data.announcement != "") {
+      if (configdata.data.announcement != '') {
         data.isSHowAnnouncement = true;
       }
       ElNotification.success({
-        title: "提示",
+        title: '提示',
         message:
-          "获取验证码后" +
+          '获取验证码后' +
           data.ctime +
-          "分钟后会释放资源,请在" +
+          '分钟后会释放资源,请在' +
           data.ctime +
-          "分钟内完成登录",
-        iconClass: "esuccess",
+          '分钟内完成登录',
+        iconClass: 'esuccess',
       });
       if (!configdata.success) {
         ElMessage.error(configdata.message);
@@ -616,18 +672,18 @@ export default {
         data.WSKEYCount = configdata.data.wskeycount;
       data.tabcount = configdata.data.tabcount;
       if (configdata.data.list.length > 0) {
-        configdata.data.list.forEach((element) => {
+        configdata.data.list.forEach(element => {
           if (data.optionsvlue == 0) data.optionsvlue = element.qLkey;
           data.options.push({
             value: element.qLkey,
             label: element.qlName,
-            count: "容量:" + element.qL_CAPACITY,
+            count: '容量:' + element.qL_CAPACITY,
           });
         });
       }
     };
 
-    const valuechange = async (value) => {
+    const valuechange = async value => {
       const configdata = await getQLConfig(value);
       data.ckcount = configdata.data.ckcount;
       data.tabcount = configdata.data.tabcount;
@@ -636,15 +692,15 @@ export default {
         ElMessage.error(configdata.message);
         return;
       }
-      ElMessage.success("切换成功");
+      ElMessage.success('切换成功');
     };
     onMounted(getmainConfig);
     const UploadWSKEYS = async () => {
-      if (!data.wskey) ElMessage.error("请先输入wskey");
-      if (!data.remarks) ElMessage.error("请先输入备注");
+      if (!data.wskey) ElMessage.error('请先输入wskey');
+      if (!data.remarks) ElMessage.error('请先输入备注');
       const loading = ElLoading.service({
         lock: true,
-        text: "正在上传",
+        text: '正在上传',
       });
       const body = await UploadWSKEY({
         wskey: data.wskey,
@@ -655,20 +711,20 @@ export default {
       if (!body.success) {
         ElMessage.error(body.message);
       } else {
-        localStorage.setItem("qlid", body.data.qlid);
-        localStorage.setItem("qlkey", body.data.qlkey);
-        router.push("/");
+        localStorage.setItem('qlid', body.data.qlid);
+        localStorage.setItem('qlkey', body.data.qlkey);
+        router.push('/');
       }
     };
     const Login = async () => {
       console.log(data.getCode);
-      if (!data.code) ElMessage.error("请先输入验证码");
-      if (!data.phone) ElMessage.error("请先输入手机");
-      if (!data.getCode) ElMessage.error("请先获取验证码");
-      if (!data.QQ && data.uploadtype == "xdd") ElMessage.error("请先获取QQ");
+      if (!data.code) ElMessage.error('请先输入验证码');
+      if (!data.phone) ElMessage.error('请先输入手机');
+      if (!data.getCode) ElMessage.error('请先获取验证码');
+      if (!data.QQ && data.uploadtype == 'xdd') ElMessage.error('请先获取QQ');
       const loading = ElLoading.service({
         lock: true,
-        text: "正在登陆",
+        text: '正在登陆',
       });
       const body = await VerifyCode({
         Phone: data.phone,
@@ -683,31 +739,31 @@ export default {
         data.marginCount = 0;
         if (body.data.tabcount) data.tabcount = body.data.tabcount;
         console.log(body);
-        if (data.uploadtype == "ql") {
+        if (data.uploadtype == 'ql') {
           ElNotification.success({
-            title: "提示",
-            message: "登录成功",
-            iconClass: "esuccess",
+            title: '提示',
+            message: '登录成功',
+            iconClass: 'esuccess',
           });
-          localStorage.setItem("qlid", body.data.qlid);
-          localStorage.setItem("qlkey", body.data.qlkey);
-          router.push("/");
+          localStorage.setItem('qlid', body.data.qlid);
+          localStorage.setItem('qlkey', body.data.qlkey);
+          router.push('/');
         } else {
-          if (data.uploadtype == "none") data.ck = body.data.ck;
-          var message = "登陆成功";
-          if (data.uploadtype == "xdd") {
-            message = "xdd推送成功！";
-            data.ck = "";
+          if (data.uploadtype == 'none') data.ck = body.data.ck;
+          var message = '登陆成功';
+          if (data.uploadtype == 'xdd') {
+            message = 'xdd推送成功！';
+            data.ck = '';
           }
           ElNotification.success({
-            title: "提示",
+            title: '提示',
             message: message,
-            iconClass: "esuccess",
+            iconClass: 'esuccess',
           });
         }
       }
     };
-    const SMSTIME = (body) => {
+    const SMSTIME = body => {
       if (body.success == false && body.data.status != 666) {
         ElMessage.error(body.message);
         return false;
@@ -726,31 +782,30 @@ export default {
     };
 
     const GetSMSCode = async () => {
-      if (data.phone == "") {
-        ElMessage.error("请输入手机号码");
+      if (data.phone == '') {
+        ElMessage.error('请输入手机号码');
         return false;
       }
       var re = /^1\d{10}$/;
       var res = re.test(data.phone);
       if (!res) {
-        ElMessage.error("手机号错误");
+        ElMessage.error('手机号错误');
         return false;
       }
-      if (data.oldphone != "" && data.phone != data.oldphone) {
+      if (data.oldphone != '' && data.phone != data.oldphone) {
         data.First = true;
       }
-      if (data.oldphone != "" && data.phone == data.oldphone) {
+      if (data.oldphone != '' && data.phone == data.oldphone) {
         data.First = false;
       }
 
       if (data.First) {
         const loading = ElLoading.service({
           lock: true,
-          text: "正在获取验证码",
+          text: '正在获取验证码',
         });
 
         data.marginCount = 1;
-        data.times = data.ctime * 60;
         data.Codetime = 60;
         data.oldphone = data.phone;
         data.First = false;
@@ -759,6 +814,7 @@ export default {
           Phone: data.phone,
           qlkey: data.optionsvlue,
         });
+        data.times = data.ctime * 60;
         if (body.success == true || body.data.status == 666) {
           let timer = setInterval(function () {
             data.times--;
@@ -769,13 +825,13 @@ export default {
         }
 
         if (body.success == false && body.data.status == 666) {
-          loading.setText("正在安全验证");
-          console.log("安全验证");
+          loading.setText('正在安全验证');
+          console.log('安全验证');
           var AutoCaptchadata = null;
           if (body.data.captcha == 1) {
             for (let index = 0; index < data.autocount; index++) {
               let count = index + 1;
-              loading.setText("第" + count + "次安全验证");
+              loading.setText('第' + count + '次安全验证');
               AutoCaptchadata = await AutoCaptcha({ Phone: data.phone });
 
               if (AutoCaptchadata.success) break;
@@ -811,9 +867,9 @@ export default {
             }
             if (AutoCaptchadata.data.captcha == 2) {
               data.ShowCaptcha2 = true;
-              data.imgUrl = "data:image/png;base64," + AutoCaptchadata.data.big;
+              data.imgUrl = 'data:image/png;base64,' + AutoCaptchadata.data.big;
               data.imgUrl2 =
-                "data:image/png;base64," + AutoCaptchadata.data.small;
+                'data:image/png;base64,' + AutoCaptchadata.data.small;
             }
             data.ShowMain = false;
             return false;
@@ -822,11 +878,11 @@ export default {
         loading.close();
         SMSTIME(body);
       } else {
-        localStorage.setItem("phone", data.phone);
+        localStorage.setItem('phone', data.phone);
         router.go(0);
       }
     };
-    const captchaTipclick = (event) => {
+    const captchaTipclick = event => {
       if (data.pointlist.length == 4) return;
       var tipIndex = data.pointlist.length + 1;
       var left = event.currentTarget.offsetLeft + event.offsetX - 15;
@@ -844,10 +900,10 @@ export default {
       if (data.pointlist.length != 4) return;
       const loading = ElLoading.service({
         lock: true,
-        text: "验证中请稍候..",
+        text: '验证中请稍候..',
       });
       var arr = [];
-      data.pointlist.forEach((element) => {
+      data.pointlist.forEach(element => {
         arr.push({
           tipIndex: element.tipIndex,
           offsetX: element.offsetX,
@@ -864,7 +920,7 @@ export default {
         data.getCode = true;
         data.ShowCaptcha2 = false;
         data.ShowMain = true;
-        ElMessage.success("认证成功");
+        ElMessage.success('认证成功');
         let timer2 = setInterval(function () {
           data.Codetime--;
           if (data.Codetime <= 0) {
@@ -876,11 +932,11 @@ export default {
       } else {
         data.pointlist = [];
         if (VerifyCaptchadata2.data.status == 666) {
-          ElMessage.error("验证失败,请重试");
-          data.imgUrl = "data:image/png;base64," + VerifyCaptchadata2.data.big;
+          ElMessage.error('验证失败,请重试');
+          data.imgUrl = 'data:image/png;base64,' + VerifyCaptchadata2.data.big;
 
           data.imgUrl2 =
-            "data:image/png;base64," + VerifyCaptchadata2.data.small;
+            'data:image/png;base64,' + VerifyCaptchadata2.data.small;
         } else {
           data.ShowCaptcha2 = false;
           data.ShowMain = true;
