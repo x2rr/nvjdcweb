@@ -167,7 +167,8 @@
 import { onMounted, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
 import { getUserInfoAPI, Upremarksapi, delAccountAPI } from "@/api/index";
-import { ElMessage} from "element-plus";
+import { ElMessage,ElLoading} from "element-plus";
+
 import Clipboard from "clipboard";
 export default {
   components: {
@@ -189,6 +190,12 @@ export default {
     });
    
     const getInfo = async () => {
+      const loading = ElLoading.service({
+            lock: true,
+            text: '加载中请稍候..',
+            background: 'rgba(0,0,0,0.7)',
+            spinner: 'el-icon-loading',
+          });
       const qlid = localStorage.getItem("qlid");
       const qlkey = localStorage.getItem("qlkey");
       var id= router.currentRoute.value.query.id
@@ -203,6 +210,7 @@ export default {
       }
       data.showuser=true;
       const userInfo = await getUserInfoAPI(qlid, qlkey);
+      loading.close();
       if (!userInfo || !userInfo.success) {
         ElMessage.error("获取用户信息失败，请重重新登录");
         logout();

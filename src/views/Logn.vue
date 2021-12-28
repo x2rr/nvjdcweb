@@ -104,7 +104,12 @@
               <img id="cpcTipImg" :src="imgUrl2" width="275" />
             </el-col>
           </el-row>
-          <el-button class="submit" type="primary" size="medium" round @click="cap2click"
+          <el-button
+            class="submit"
+            type="primary"
+            size="medium"
+            round
+            @click="cap2click"
             >确认</el-button
           >
         </div>
@@ -591,6 +596,12 @@ export default {
       });
     };
     const getmainConfig = async () => {
+      const loadingMain = ElLoading.service({
+        lock: true,
+        text: '加载中请稍候..',
+        background: 'rgba(0,0,0,0.7)',
+        spinner: 'el-icon-loading',
+      });
       const cphone = localStorage.getItem('phone');
       if (cphone) {
         data.phone = cphone;
@@ -608,6 +619,8 @@ export default {
           const loading = ElLoading.service({
             lock: true,
             text: '验证中请稍候..',
+            background: 'rgba(0,0,0,0.7)',
+            spinner: 'el-icon-loading',
           });
 
           var VerifyCaptchadata = await VerifyCaptcha({
@@ -645,6 +658,7 @@ export default {
         onSuccess: function () {},
       });
       const configdata = await getConfigMain();
+      loadingMain.close();
       console.log(configdata);
       data.uploadtype = configdata.data.type;
       data.ctime = configdata.data.closetime;
@@ -701,6 +715,8 @@ export default {
       const loading = ElLoading.service({
         lock: true,
         text: '正在上传',
+        background: 'rgba(0,0,0,0.7)',
+        spinner: 'el-icon-loading',
       });
       const body = await UploadWSKEY({
         wskey: data.wskey,
@@ -725,6 +741,8 @@ export default {
       const loading = ElLoading.service({
         lock: true,
         text: '正在登陆',
+        background: 'rgba(0,0,0,0.7)',
+        spinner: 'el-icon-loading',
       });
       const body = await VerifyCode({
         Phone: data.phone,
@@ -803,6 +821,8 @@ export default {
         const loading = ElLoading.service({
           lock: true,
           text: '正在获取验证码',
+          background: 'rgba(0,0,0,0.7)',
+          spinner: 'el-icon-loading',
         });
 
         data.marginCount = 1;
@@ -901,6 +921,8 @@ export default {
       const loading = ElLoading.service({
         lock: true,
         text: '验证中请稍候..',
+        background: 'rgba(0,0,0,0.7)',
+        spinner: 'el-icon-loading',
       });
       var arr = [];
       data.pointlist.forEach(element => {
